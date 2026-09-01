@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#21262B">
+<title>Quebank by Aryan</title>
+<meta name="description" content="UPSC / UPPCS objective and subjective question bank, generated on demand.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <button id="menuBtn" class="iconBtn" aria-label="Open menu" data-i18n-aria="menu.open" aria-expanded="false">
+    <svg viewBox="0 0 24 24" width="22" height="22"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+  </button>
+  <div class="brand">
+    <span class="brandMark">Q</span>
+    <span class="brandName">Quebank <em>by Aryan</em></span>
+  </div>
+  <div class="topbarRight">
+    <div class="langSwitch" role="group" aria-label="Language">
+      <button type="button" class="langBtn" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" class="langBtn" data-lang="hi" aria-pressed="false">हिं</button>
+    </div>
+    <button id="homeBtn" class="iconBtn" aria-label="Go home" data-i18n-aria="home.aria">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 11.5 12 4l8 7.5M6 10v9h5v-5h2v5h5v-9" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" fill="none"/></svg>
+    </button>
+  </div>
+</header>
+
+<div id="menuOverlay" class="menuOverlay hidden"></div>
+<nav id="sideMenu" class="sideMenu" aria-label="Saved topics">
+  <div class="sideMenuHead">
+    <h2 data-i18n="menu.savedTopics">Saved topics</h2>
+    <button id="menuCloseBtn" class="iconBtn" aria-label="Close menu" data-i18n-aria="menu.close">
+      <svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 5l14 14M19 5 5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="menuTabs">
+    <button class="menuTab active" data-menutab="objective" data-i18n="tab.objective">Objective</button>
+    <button class="menuTab" data-menutab="subjective" data-i18n="tab.subjective">Subjective</button>
+  </div>
+  <div class="menuFilters">
+    <input id="menuSearchInput" type="search" class="menuSearchInput" data-i18n-placeholder="menu.searchPlaceholder" autocomplete="off">
+    <div id="menuTagChips" class="menuTagChips"></div>
+  </div>
+  <div id="menuListObjective" class="menuList"></div>
+  <div id="menuListSubjective" class="menuList hidden"></div>
+  <div class="sideMenuFoot">
+    <button id="exportBackupBtn" class="ghostBtn menuFootBtn" type="button">
+      <span data-i18n="backup.exportBtn">Export backup (.json)</span>
+    </button>
+    <button id="importBackupBtn" class="ghostBtn menuFootBtn" type="button">
+      <span data-i18n="backup.importBtn">Restore from backup</span>
+    </button>
+    <input id="importFileInput" type="file" accept="application/json,.json" class="hidden">
+    <p id="backupStatus" class="backupStatus hidden" role="status" aria-live="polite"></p>
+  </div>
+</nav>
+
+<main id="app"></main>
+
+<template id="tpl-home">
+  <section class="home">
+    <div class="modeTabs">
+      <button class="modeTab active" data-mode="objective" data-i18n="tab.objective">Objective</button>
+      <button class="modeTab" data-mode="subjective" data-i18n="tab.subjective">Subjective</button>
+    </div>
+
+    <section class="panel" data-panel="objective">
+      <h1 data-i18n="home.obj.title">New objective test</h1>
+      <p class="hint" data-i18n="home.obj.hint">Enter a topic. 30 fresh MCQs in UPSC / UPPCS style, PYQs included.</p>
+      <form id="objForm" class="topicForm">
+        <input id="objTopicInput" type="text" placeholder="e.g. Fundamental Rights, Indian Monsoon, Mauryan Administration" data-i18n-placeholder="home.obj.placeholder" autocomplete="off" required>
+        <button type="submit" class="primaryBtn" data-i18n="home.obj.submit">Generate 30 MCQs</button>
+      </form>
+      <button id="mixTestBtn" class="ghostBtn" data-i18n="home.obj.mixBtn">Mix test — 50 questions from all saved topics</button>
+      <p id="mixTestHint" class="hint small"></p>
+    </section>
+
+    <section class="panel hidden" data-panel="subjective">
+      <h1 data-i18n="home.sub.title">New subjective set</h1>
+      <p class="hint" data-i18n="home.sub.hint">Enter a topic. 5 Mains-style questions, model answers stay hidden until you reveal them.</p>
+      <form id="subForm" class="topicForm">
+        <input id="subTopicInput" type="text" placeholder="e.g. Judicial Review, Cropping Patterns of UP, Bureaucracy Reforms" data-i18n-placeholder="home.sub.placeholder" autocomplete="off" required>
+        <button type="submit" class="primaryBtn" data-i18n="home.sub.submit">Generate 5 questions</button>
+      </form>
+    </section>
+  </section>
+</template>
+
+<template id="tpl-loading">
+  <section class="loading">
+    <div class="spinner" aria-hidden="true"></div>
+    <p id="loadingText" data-i18n="loading.default">Generating questions…</p>
+  </section>
+</template>
+
+<template id="tpl-error">
+  <section class="errorPane">
+    <h2 data-i18n="error.title">Something didn't work</h2>
+    <p id="errorText"></p>
+    <button id="errorRetryBtn" class="primaryBtn" data-i18n="error.retry">Try again</button>
+    <button id="errorHomeBtn" class="ghostBtn" data-i18n="common.backHome">Back to home</button>
+  </section>
+</template>
+
+<template id="tpl-test">
+  <section class="testView">
+    <div class="testHead">
+      <h1 id="testTopicTitle"></h1>
+      <button id="submitTestBtn" class="primaryBtn" data-i18n="test.submit">Submit test</button>
+    </div>
+    <div id="qPalette" class="qPalette" aria-label="Question navigator" data-i18n-aria="test.paletteAria"></div>
+    <div class="qCard">
+      <div class="qMeta">
+        <span id="qNumber"></span>
+        <span id="qPyqTag" class="pyqTag hidden">PYQ</span>
+        <button id="qFlagBtn" type="button" class="flagBtn" aria-pressed="false" data-i18n-aria="test.flagAria">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M6 3v18M6 4h11l-2.5 4L17 12H6" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" fill="none"/></svg>
+        </button>
+      </div>
+      <p id="qText" class="qText"></p>
+      <div id="qOptions" class="qOptions"></div>
+    </div>
+    <div class="testNav">
+      <button id="prevQBtn" class="ghostBtn" data-i18n="test.prev">← Previous</button>
+      <button id="nextQBtn" class="ghostBtn" data-i18n="test.next">Next →</button>
+    </div>
+  </section>
+</template>
+
+<template id="tpl-report">
+  <section class="reportView">
+    <h1 data-i18n="report.title">Report card</h1>
+    <h2 id="reportTopicTitle" class="reportTopic"></h2>
+    <div class="scoreGrid">
+      <div class="scoreCell scoreCell--score"><span id="scScore"></span><label data-i18n="report.score">Score</label></div>
+      <div class="scoreCell"><span id="scCorrect"></span><label data-i18n="report.correct">Correct</label></div>
+      <div class="scoreCell"><span id="scWrong"></span><label data-i18n="report.wrong">Wrong</label></div>
+      <div class="scoreCell"><span id="scSkipped"></span><label data-i18n="report.skipped">Unattempted</label></div>
+    </div>
+    <div id="reportTrend" class="reportTrend hidden"></div>
+    <div class="reportActions">
+      <button id="reportRetakeBtn" class="ghostBtn" data-i18n="report.retake">Retake this test</button>
+      <button id="reviewFlagToggle" class="ghostBtn hidden" data-i18n="report.flaggedOnly">Flagged only</button>
+    </div>
+    <div id="reviewList" class="reviewList"></div>
+    <button id="reportHomeBtn" class="primaryBtn" data-i18n="common.backHome">Back to home</button>
+  </section>
+</template>
+
+<template id="tpl-subjectiveset">
+  <section class="subjSet">
+    <h1 id="subjSetTitle"></h1>
+    <div id="subjQuestions" class="subjQuestions"></div>
+    <button id="subjHomeBtn" class="ghostBtn" data-i18n="common.backHome">Back to home</button>
+  </section>
+</template>
+
+<script src="app.js"></script>
+</body>
+</html>
