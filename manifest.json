@@ -1,0 +1,19 @@
+{
+  "name": "Quebank by Aryan",
+  "short_name": "Quebank",
+  "description": "UPSC / UPPCS objective and subjective question bank, generated on demand.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EFEAE0",
+  "theme_color": "#21262B",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
